@@ -17,11 +17,15 @@ const int etapa_ciclismo = 2;
 const int etapa_T2 = 3;
 const int etapa_corrida = 4;
 
+const int ciclismo_subida = 0;
+const int ciclismo_plano = 1;
+const int ciclismo_descida = 2;
+
 typedef struct{
   int min[4], max[4];
 }velocidades;
 
-velocidades velocidades_etapa[5];
+velocidades *velocidades_etapa[5];
 
 int num_atletas;
 int homens_pro, mulheres_pro, homens_amadores, mulheres_amadoras;
@@ -34,6 +38,7 @@ void correr(void *arg){
   int etapa_atual = 0;
   while( /*nao termina essa prova*/ 1){
     while( /*Distancia percorrida < distancia etapa*/ 1){
+      /*Verificar caso especial: ciclismo*/
       /*sortear entre velocidades_etapa[etapa].min[categoria] e velocidades_etapa[etapa].max[categoria]*/
       /*CORRE NEGADIS*/
       if (/*Time elapsed since last announce > meia hora(ou minuto em debug)*/ 1){
