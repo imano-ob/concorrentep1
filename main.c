@@ -21,6 +21,8 @@ const int ciclismo_subida = 0;
 const int ciclismo_plano = 1;
 const int ciclismo_descida = 2;
 
+int **posicao_atleta;
+
 typedef struct{
   int min[4], max[4];
 }velocidades;
@@ -36,11 +38,22 @@ void correr(void *arg){
   int categoria;
   categoria = (int *)*arg;
   int etapa_atual = 0;
-  while( /*nao termina essa prova*/ 1){
-    while( /*Distancia percorrida < distancia etapa*/ 1){
-      /*Verificar caso especial: ciclismo*/
-      /*sortear entre velocidades_etapa[etapa].min[categoria] e velocidades_etapa[etapa].max[categoria]*/
-      /*CORRE NEGADIS*/
+  int distancia_percorrida = 0;
+  int tempo_atual = 0;
+  int done = 0;
+  int velocidade_atual;
+  velocidades velocidades_ref;
+  while(!done){
+    while( distancia_percorrida < distancia_etapa[etapa_atual]){
+      if (etapa_atual == etapa_ciclismo){
+	terreno_atual = 1; /*TODO: Verificar se subida, descida ou plano*/
+	velocidades_ref = velocidades_etapa[etapa_ciclismo][terreno_atual];
+      }
+      else
+	velocidades_ref = velocidades_etapa[etapa_atual][0];
+      /*velocidade atual = random entre min e max*/
+      distancia_percorrida += /*something*/ 100;
+      tempo_atual += velocidade_atual /*mudar esse nome?*/
       if (/*Time elapsed since last announce > meia hora(ou minuto em debug)*/ 1){
         /*Calcula onde tava na meia hora*/
         /*Await poder anunciar*/
