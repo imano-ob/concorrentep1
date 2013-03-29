@@ -20,7 +20,7 @@ velocidades inicaliza_vels(int hp_min, int hp_max, int mp_min, int mp_max, int h
 int main(int argc, char **argv){
   int i, j, id_atleta = 0;
   int participantes_categoria[NUM_CATEGORIAS]
-  tmpname2 tmpname;
+  info_atleta info;
   /*Readfiles*/
   /*Inicializar coisas*/
   srand(time(NULL));

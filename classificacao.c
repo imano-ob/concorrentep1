@@ -1,3 +1,5 @@
+#include "globals.h"
+
 void anunciar(void *args){
   int i;
   while (/*prova nao termina*/ 1){
