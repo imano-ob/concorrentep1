@@ -1,14 +1,33 @@
 #include "globals.h"
 
+typedef struct{
+  int distancia;
+  int id;
+}cur_atleta_info;
+
+
+/*Funcao de comparacao pro qsort*/
+int compare_info(cur_atleta_info atleta1, cur_atleta_info atleta2){
+  return atleta1.distancia - atleta2.distancia;
+}
+
 void anunciar(void *args){
-  int i;
-  while (/*prova nao termina*/ 1){
+  int i, categoria, cur_local_id[NUM_CATEGORIAS];
+  cur_atleta_info *info[NUM_CATEGORIAS];
+  /*init*/
+  while (!todos_done){
+    for(i = 0; i < NUM_CATEGORIAS; i++)
+      cur_local_id[i] = 0;
     for (i = 0; i < num_atletas; i++){
-      /*Await ter um numero anunciado*/
-      /*Guarda esse numero no vetor da categoria*/
-      /*Zera aquele numero*/
+      while(isEmpty(queue[i]))
+        sleep(1);
+      categoria = categoria_atleta[i];
+      info[categoria][cur_local_id[categoria]].distancia =
+        distancia_percorrida[i];
+      info[categoria][cur_local_id[categoria]].id = i;
+      cur_local_id[categoria] += 1;
     }
-    for(i = 0; i < num_categorias; i++){
+    for(i = 0; i < NUM_CATEGORIAS; i++){
       /*qsort no vetor*/
       /*anuncia top 3 ou top everyone no debug*/
     }

@@ -42,6 +42,8 @@ km_estrada estrada[180];
 /*?*/
 int **posicao_atleta;
 
+int *categoria_atleta;
+
 int go[NUM_ETAPAS];
 
 int *tempo_corrido;

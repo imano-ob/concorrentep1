@@ -1,7 +1,7 @@
 #include "globals.h"
 
 void correr(void *arg){
-  int categoria;
+  //  int categoria;
   int id;
   info_atleta *info;
   int etapa_atual = 0;
@@ -11,7 +11,7 @@ void correr(void *arg){
   velocidades velocidades_ref;
   int km_atual = 0, km_ant = 0;;
   tmpname3 = (tmpname *)arg;
-  categoria = tmpname3->categoria;
+  categoria_atleta[id] = tmpname3->categoria;
   id = tmpname3->id;
   initialized = 1;
   while(!done[id]){
@@ -25,8 +25,8 @@ void correr(void *arg){
       else
 	vel_ref = velocidades_etapa[etapa_atual][0];
       random_variance = (float)rand()/RAND_MAX;
-      vel_dif = vel_ref.max[categoria] - vel_ref.min[categoria];
-      vel_atual = vel_ref.min[categoria] + (int)(vel_dif * random_variance);
+      vel_dif = vel_ref.max[categoria_atleta[id]] - vel_ref.min[categoria_atleta[id]];
+      vel_atual = vel_ref.min[categoria_atleta[id]] + (int)(vel_dif * random_variance);
       dist = (etapa_atual == etapa_ciclismo ? 1000: (etapa_atual == etapa_T1 || 
 						     etapa_atual == etapa_T2)? 0: 100); 
       tempo_corrido[id] += vel_atual;
