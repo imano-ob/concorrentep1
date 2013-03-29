@@ -36,11 +36,10 @@ typedef struct{
 
 pthread_t *atleta;
 pthread_t classificacao;
+pthread_t sync_thread;
 int *PortalT1Ent, *PortalT1Sai, *PortalT2Ent, *PortalT2Sai, 
 km_estrada estrada[180];
 
-/*?*/
-int **posicao_atleta;
 
 int *categoria_atleta;
 
@@ -51,7 +50,7 @@ int *distancia_percorrida;
 
 velocidades *velocidades_etapa[NUM_ETAPAS];
 
-int num_atletas;
+int num_atletas = 0;
 int participantes_categoria[NUM_CATEGORIAS];
 
 int *done;
