@@ -46,6 +46,7 @@ void readfiles(char filename[50]){
     for(; i < j + kms; i++)
       estrada[i].terreno = terrain_type;
   }
+  fclose(file);
 }
 
 int main(int argc, char **argv){
@@ -73,7 +74,7 @@ int main(int argc, char **argv){
   done = malloc(num_atletas * sizeof *done);
   memset(done, 0, num_atletas * sizeof *done);
   tempo_corrido = malloc(num_atletas * sizeof *tempo_corrido);
-  memset(tempo_corrido, 0, num_atletas * sizeof *tempo_corrido;
+  memset(tempo_corrido, 0, num_atletas * sizeof *tempo_corrido);
   distancia_percorrida = malloc(num_atletas * sizeof *distancia_percorrida);
   memset(distancia_percorrida, 0, num_atletas * sizeof *distancia_percorrida);
   /*mais init*/ 
@@ -99,6 +100,11 @@ int main(int argc, char **argv){
   if(pthread_create(sync_thread, NULL, &sync, NULL)){
     fprintf(stderr, "Erro ao criar thread de sincronizacao\n");
     exit(EXIT_FAILURE);
-  }    
-  /*Wait...*/
+  }
+  /*anuncia?*/
+  pthread_join(sync);
+  pthread_join(classificacao);
+  for(i = 0; i < num_atletas; i++)
+    pthread_join(atleta[i]);
+  return 0;
 }

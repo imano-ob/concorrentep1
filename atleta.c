@@ -1,7 +1,6 @@
 #include "globals.h"
 
 void correr(void *arg){
-  //  int categoria;
   int id;
   info_atleta *info;
   int etapa_atual = 0;
