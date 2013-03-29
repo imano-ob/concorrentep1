@@ -52,7 +52,7 @@ int *distancia_percorrida;
 velocidades *velocidades_etapa[NUM_ETAPAS];
 
 int num_atletas;
-int homens_pro, mulheres_pro, homens_amadores, mulheres_amadoras;
+int participantes_categoria[NUM_CATEGORIAS];
 
 int *done;
 

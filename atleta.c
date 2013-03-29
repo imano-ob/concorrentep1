@@ -49,6 +49,18 @@ void correr(void *arg){
     /*Toda transicao tem que syncar*/
     if( etapa_atual < num_etapas ){
       dist_etapa = 0;
+      switch(etapa){
+      case ETAPA_T1: 
+        PortalT1Ent[id] = 1; break;
+      case ETAPA_CICLISMO:
+        PortalT1Sai[id] = 1; break;
+      case ETAPA_T2:
+        PortalT2Ent[id] = 1; break;
+      case ETAPA_CORRIDA:
+        PortalT2Sai[id] = 1; break;
+      default:
+        break;
+      } 
       while(!go[etapa_atual])
         sleep(1);
     }

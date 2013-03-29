@@ -19,7 +19,6 @@ velocidades inicaliza_vels(int hp_min, int hp_max, int mp_min, int mp_max, int h
 
 int main(int argc, char **argv){
   int i, j, id_atleta = 0;
-  int participantes_categoria[NUM_CATEGORIAS]
   info_atleta info;
   /*Readfiles*/
   /*Inicializar coisas*/
@@ -29,7 +28,7 @@ int main(int argc, char **argv){
     exit(EXIT_FAILURE);
   }
   for (i = 0; i < NUM_CATEGORIAS; i++){
-    for (j = 0; j < participants_categoria[i]; j++){
+    for (j = 0; j < participantes_categoria[i]; j++){
       initialized = 0;
       tmpname.categoria = i;
       tmpname.id = id_atleta;
@@ -42,5 +41,9 @@ int main(int argc, char **argv){
       id_atleta++;
     }
   }
+  if(pthread_create(sync_thread, NULL, &sync, NULL)){
+    fprintf(stderr, "Erro ao criar thread de sincronizacao\n");
+    exit(EXIT_FAILURE);
+  }    
   /*Wait...*/
 }

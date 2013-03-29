@@ -7,8 +7,8 @@ typedef struct{
 
 
 /*Funcao de comparacao pro qsort*/
-int compare_info(cur_atleta_info atleta1, cur_atleta_info atleta2){
-  return atleta1.distancia - atleta2.distancia;
+int compare_info(cur_atleta_info *atleta1, cur_atleta_info *atleta2){
+  return *atleta2.distancia - *atleta1.distancia;
 }
 
 void anunciar(void *args){
@@ -28,7 +28,7 @@ void anunciar(void *args){
       cur_local_id[categoria] += 1;
     }
     for(i = 0; i < NUM_CATEGORIAS; i++){
-      /*qsort no vetor*/
+      qsort((void*)info, participantes_categoria[categoria], sizeof(cur_atleta_info), compare_info);
       /*anuncia top 3 ou top everyone no debug*/
     }
   }
