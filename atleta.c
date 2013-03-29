@@ -9,6 +9,7 @@ void correr(void *arg){
   int vel_atual;
   int dist_etapa = 0;
   velocidades velocidades_ref;
+  int km_atual = 0, km_ant = 0;;
   tmpname3 = (tmpname *)arg;
   categoria = tmpname3->categoria;
   id = tmpname3->id;
@@ -16,7 +17,9 @@ void correr(void *arg){
   while(!done[id]){
     while( distancia_percorrida[id] < distancia_etapa[etapa_atual]){
       if (etapa_atual == etapa_ciclismo){
-	terreno_atual = estrada[(distancia_percorrida/1000)].terreno;
+        km_ant = km_atual;
+        km_atual = dist_etapa/1000;
+	terreno_atual = estrada[km_atual].terreno;
 	vel_ref = velocidades_etapa[etapa_ciclismo][terreno_atual];
       }
       else
@@ -30,20 +33,24 @@ void correr(void *arg){
       while (tempo_corrido[id] >= ultimo_anuncio + 1800){
        	vel = (float)dist/(float)vel_atual;
 	dist_anuncio = distancia_percorrida[id] + (int)(vel * (ultimo_anuncio + 1800));
-	/*Await poder anunciar*/
-        /*Anuncia*/
+	while(isFull(queue[id]))
+          sleep(1);
+        queueAdd(queue[id], dist_anuncio);
 	ultimo_anuncio += 1800;
       }
       dist_etapa += dist;
       distancia_percorrida[id] += dist;
-      /*TODO: Atualizar posicao na estrada se for ciclismo*/
+      if(etapa_atual == ETAPA_CORRIDA && km_ant < km_atual){
+        estrada[km_ant].atletas[id] = 0;
+        estrada[km_atual].atletas[id] = 1;
+      }
     }
     etapa_atual++;
     /*Toda transicao tem que syncar*/
     if( etapa_atual < num_etapas ){
       dist_etapa = 0;
-      /*Sync*/
-      /*Await go*/
+      while(!go[etapa_atual])
+        sleep(1);
     }
     else
       done[id] = 1;

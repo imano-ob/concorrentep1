@@ -21,7 +21,7 @@
 #define CICLISMO_DESCIDA 2
 
 typedef struct{
-  int min[4], max[4];
+  int min[NUM_CATEGORIAS], max[NUM_CATEGORIAS];
 }velocidades;
 
 typedef struct{
@@ -42,10 +42,12 @@ km_estrada estrada[180];
 /*?*/
 int **posicao_atleta;
 
+int go[NUM_ETAPAS];
+
 int *tempo_corrido;
 int *distancia_percorrida;
 
-velocidades *velocidades_etapa[5];
+velocidades *velocidades_etapa[NUM_ETAPAS];
 
 int num_atletas;
 int homens_pro, mulheres_pro, homens_amadores, mulheres_amadoras;
