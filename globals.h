@@ -1,6 +1,10 @@
 #ifndef __GLOBALS__
 #define __GLOBALS__
 
+#include <pthread.h>
+
+#include "queue.h"
+
 #define CAT_HOMEM_PRO 0
 #define CAT_MULHER_PRO 1
 #define CAT_HOMEM_AMADOR 2
@@ -39,7 +43,7 @@ pthread_t classificacao;
 pthread_t sync_thread;
 int *PortalT1Ent, *PortalT1Sai, *PortalT2Ent, *PortalT2Sai, 
 km_estrada estrada[180];
-
+Queue *anuncios_posicao;
 
 int *categoria_atleta;
 

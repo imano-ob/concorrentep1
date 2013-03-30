@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <pthread.h>
+#include <string.h>
+
+#include "queue.h"
 #include "globals.h"
 
 velocidades inicaliza_vels(int hp_min, int hp_max, int mp_min, int mp_max, int ha_min, int ha_max,
@@ -49,12 +53,7 @@ void readfiles(char filename[50]){
   fclose(file);
 }
 
-int main(int argc, char **argv){
-  int i, j, id_atleta = 0;
-  info_atleta info;
-  char file[50];
-  /*achar nome do arquvivo*/
-  readfile(file);
+void aloca_globais(){
   for (i = 0; i < NUM_CATEGORIAS; i++)
     num_atletas += participantes_categoria[i];
   PortalT1Ent = malloc(num_atletas * sizeof *PortalT1Ent);
@@ -77,6 +76,22 @@ int main(int argc, char **argv){
   memset(tempo_corrido, 0, num_atletas * sizeof *tempo_corrido);
   distancia_percorrida = malloc(num_atletas * sizeof *distancia_percorrida);
   memset(distancia_percorrida, 0, num_atletas * sizeof *distancia_percorrida);
+  anuncios_posicao = malloc(num_atletas * sizeof *anuncios_posicao);
+  for(i = 0; i < num_atletas; i++)
+    anuncios_posicao[i] = queueInit(10);
+}
+
+int main(int argc, char **argv){
+  int i, j, id_atleta = 0;
+  info_atleta info;
+  char file[50];
+  if (!strcmp("-debug"), argv[1])
+    strncpy(file, argv[2], 50);
+  else
+    strncpy(file, argv[1], 50);
+  /*achar nome do arquvivo*/
+  readfile(file);
+  aloca_globais();
   /*mais init*/ 
   srand(time(NULL));
   if(pthread_create(classificacao), NULL, &anunciar, NULL){

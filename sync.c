@@ -1,3 +1,7 @@
+#include "sync.h"
+
+#include <stdlib.h>
+
 #include "globals.h"
 
 int compara_tempo(int *i, int*j){

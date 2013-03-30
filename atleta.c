@@ -1,3 +1,8 @@
+#include "atleta.h"
+
+#include <stdlib.h>
+
+#include "queue.h"
 #include "globals.h"
 
 void correr(void *arg){
@@ -9,9 +14,9 @@ void correr(void *arg){
   int dist_etapa = 0;
   velocidades velocidades_ref;
   int km_atual = 0, km_ant = 0;;
-  tmpname3 = (tmpname *)arg;
-  categoria_atleta[id] = tmpname3->categoria;
-  id = tmpname3->id;
+  info = (info_atleta *)arg;
+  categoria_atleta[id] = info->categoria;
+  id = info->id;
   initialized = 1;
   while(!done[id]){
     while( distancia_percorrida[id] < distancia_etapa[etapa_atual]){
@@ -32,7 +37,7 @@ void correr(void *arg){
       while (tempo_corrido[id] >= ultimo_anuncio + 1800){
        	vel = (float)dist/(float)vel_atual;
 	dist_anuncio = distancia_percorrida[id] + (int)(vel * (ultimo_anuncio + 1800));
-	while(isFull(queue[id]))
+	while(queueFull(anuncios_posicao[id]))
           sleep(1);
         queueAdd(queue[id], dist_anuncio);
 	ultimo_anuncio += 1800;
