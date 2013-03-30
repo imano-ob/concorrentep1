@@ -3,28 +3,33 @@
 #include <time.h>
 #include <pthread.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "classificacao.h"
+#include "atleta.h"
+#include "sync.h"
 #include "queue.h"
 #include "globals.h"
 
 velocidades inicaliza_vels(int hp_min, int hp_max, int mp_min, int mp_max, int ha_min, int ha_max,
                            int ma_min, int ma_max){
   velocidades vel;
-  vel.min[cat_homem_pro] = hp_min;
-  vel.max[cat_homem_pro] = hp_max;
-  vel.min[cat_mulher_pro] = mp_min;
-  vel.max[cat_mulher_pro] = mp_max;
-  vel.min[cat_homem_amador] = ha_min;
-  vel.max[cat_homem_amador] = ha_max;
-  vel.min[cat_mulher_amadora] = ma_min;
-  vel.max[cat_mulher_amadora] = ma_max;
+  vel.min[CAT_HOMEM_PRO] = hp_min;
+  vel.max[CAT_HOMEM_PRO] = hp_max;
+  vel.min[CAT_MULHER_PRO] = mp_min;
+  vel.max[CAT_MULHER_PRO] = mp_max;
+  vel.min[CAT_HOMEM_AMADOR] = ha_min;
+  vel.max[CAT_HOMEM_AMADOR] = ha_max;
+  vel.min[CAT_MULHER_AMADORA] = ma_min;
+  vel.max[CAT_MULHER_AMADORA] = ma_max;
   return vel;
 }
 
-void readfiles(char filename[50]){
+void readfile(char filename[50]){
   char buf[50];
   int option, terrain_type, i, j, kms;
   FILE *file;
+  num_atletas = 0;
   file = fopen(filename, "r");
   fgets(buf, 50, file);
   participantes_categoria[CAT_HOMEM_PRO] = atoi(buf);
@@ -54,6 +59,7 @@ void readfiles(char filename[50]){
 }
 
 void aloca_globais(){
+  int i;
   for (i = 0; i < NUM_CATEGORIAS; i++)
     num_atletas += participantes_categoria[i];
   PortalT1Ent = malloc(num_atletas * sizeof *PortalT1Ent);
@@ -85,7 +91,8 @@ int main(int argc, char **argv){
   int i, j, id_atleta = 0;
   info_atleta info;
   char file[50];
-  if (!strcmp("-debug"), argv[1])
+  void **retval;
+  if (!strcmp("-debug", argv[1]))
     strncpy(file, argv[2], 50);
   else
     strncpy(file, argv[1], 50);
@@ -94,16 +101,23 @@ int main(int argc, char **argv){
   aloca_globais();
   /*mais init*/ 
   srand(time(NULL));
-  if(pthread_create(classificacao), NULL, &anunciar, NULL){
+  todos_done = 0;
+  retval = malloc(sizeof *retval);
+  distancia_etapa[ETAPA_NATACAO] = 3800;
+  distancia_etapa[ETAPA_T1] = 0;
+  distancia_etapa[ETAPA_CICLISMO] = 180000;
+  distancia_etapa[ETAPA_T2] = 0;
+  distancia_etapa[ETAPA_CORRIDA] = 42000;
+  if(pthread_create(&classificacao, NULL, &anunciar, NULL)){
     fprintf(stderr, "Erro ao criar thread da classificacao\n");
     exit(EXIT_FAILURE);
   }
   for (i = 0; i < NUM_CATEGORIAS; i++){
     for (j = 0; j < participantes_categoria[i]; j++){
       initialized = 0;
-      tmpname.categoria = i;
-      tmpname.id = id_atleta;
-      if(pthread_create(atleta[id_atleta], NULL, &correr, &tmpname)){
+      info.categoria = i;
+      info.id = id_atleta;
+      if(pthread_create(&atleta[id_atleta], NULL, &correr, &info)){
 	fprintf(stderr, "Erro ao criar thread do atleta\n");
 	exit(EXIT_FAILURE);
       }
@@ -112,14 +126,14 @@ int main(int argc, char **argv){
       id_atleta++;
     }
   }
-  if(pthread_create(sync_thread, NULL, &sync, NULL)){
+  if(pthread_create(&sync_thread, NULL, &sincroniza, NULL)){
     fprintf(stderr, "Erro ao criar thread de sincronizacao\n");
     exit(EXIT_FAILURE);
   }
   /*anuncia?*/
-  pthread_join(sync);
-  pthread_join(classificacao);
+  pthread_join(sync_thread, retval);
+  pthread_join(classificacao, retval);
   for(i = 0; i < num_atletas; i++)
-    pthread_join(atleta[i]);
+    pthread_join(atleta[i], retval);
   return 0;
 }

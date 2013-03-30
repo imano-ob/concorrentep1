@@ -1,18 +1,23 @@
 #include "sync.h"
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "globals.h"
 
-int compara_tempo(int *i, int*j){
-  return tempo_corrido[*i] - tempo_corrido[*j];
+static int compara_tempo(const void *i, const void *j){
+  int k, l;
+  k =  * (int *)i;
+  l =  * (int *)j;
+  return tempo_corrido[k] - tempo_corrido[l];
 }
 
-void sync(){
-  int i;
+void *sincroniza(void *arg){
+  int i, j;
   int *lista_atletas, *ordem_atletas;
+  ordem_atletas  = malloc(num_atletas * sizeof *ordem_atletas);
   for (i = 1; i < NUM_ETAPAS; i++){
-    for(j = 0; j < NUM_ATLETAS; j++){
+    for(j = 0; j < num_atletas; j++){
       switch(i){
       case ETAPA_T1: 
         lista_atletas = PortalT1Ent; break;
@@ -34,4 +39,8 @@ void sync(){
         tempo_corrido[ordem_atletas[j]] += 3;
     go[i] = 1;
   }
+  while(!done[j])
+    sleep(1);
+  todos_done = 1;
+  return NULL;
 }

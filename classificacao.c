@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "globals.h"
 #include "queue.h"
@@ -13,15 +14,15 @@ typedef struct{
 
 
 /*Funcao de comparacao pro qsort*/
-int compare_info(cur_atleta_info *atleta1, cur_atleta_info *atleta2){
-  return *atleta2.distancia - *atleta1.distancia;
+static int compare_info(const void *atleta1, const void *atleta2){
+  return ((cur_atleta_info *)atleta2)->distancia - ((cur_atleta_info*)atleta1)->distancia;
 }
 
-void anunciar(void *args){
+void *anunciar(void *args){
   int i, categoria, cur_local_id[NUM_CATEGORIAS];
   cur_atleta_info *info[NUM_CATEGORIAS];
   for(i = 0; i < NUM_CATEGORIAS; i++)
-    info = malloc(participantes_categoria[i] * sizeof (*info));
+    info[i] = malloc(participantes_categoria[i] * sizeof (*(info[i])));
   while (!todos_done){
     for(i = 0; i < NUM_CATEGORIAS; i++)
       cur_local_id[i] = 0;
@@ -36,8 +37,9 @@ void anunciar(void *args){
     }
     for(i = 0; i < NUM_CATEGORIAS; i++){
       qsort((void*)info[i], participantes_categoria[categoria], sizeof(cur_atleta_info), compare_info);
-      fprint(stdout, "%s :\n\n 1 %d\n2 %d\n3 %d\n\n", "Categoria", info[0].id, info[1].id, info[2].id);
+      fprintf(stdout, "%s :\n\n 1 %d\n2 %d\n3 %d\n\n", "Categoria", info[i][0].id, info[i][1].id, info[i][2].id);
       /*anuncia top 3 ou top everyone no debug*/
     }
   }
+  return NULL;
 }
