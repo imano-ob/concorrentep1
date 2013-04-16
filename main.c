@@ -59,20 +59,13 @@ void readfile(char filename[50]){
 }
 
 void aloca_globais(){
-  int i;
+  int i, j;
   for (i = 0; i < NUM_CATEGORIAS; i++)
     num_atletas += participantes_categoria[i];
-  PortalT1Ent = malloc(num_atletas * sizeof *PortalT1Ent);
-  memset(PortalT1Ent, 0, num_atletas * sizeof *PortalT1Ent);
-  PortalT1Sai = malloc(num_atletas * sizeof *PortalT1Sai);
-  memset(PortalT1Sai, 0, num_atletas * sizeof *PortalT1Sai);
-  PortalT2Ent = malloc(num_atletas * sizeof *PortalT2Ent);
-  memset(PortalT2Ent, 0, num_atletas * sizeof *PortalT2Ent);
-  PortalT2Sai = malloc(num_atletas * sizeof *PortalT2Sai);
-  memset(PortalT2Sai, 0, num_atletas * sizeof *PortalT2Sai);
   for (i = 0; i < 180; i++){
-    estrada[i].atletas = malloc(num_atletas * sizeof *(estrada[i].atletas));
-    memset(estrada[i].atletas, 0, num_atletas * sizeof *(estrada[i].atletas));
+    for (j = 0; j < 3; j++){
+      estrada[i].atletas[j] = -1;
+    }
   }
   atleta = malloc(num_atletas * sizeof *atleta);
   categoria_atleta = malloc(num_atletas * sizeof *categoria_atleta);
@@ -80,8 +73,10 @@ void aloca_globais(){
   memset(done, 0, num_atletas * sizeof *done);
   tempo_corrido = malloc(num_atletas * sizeof *tempo_corrido);
   memset(tempo_corrido, 0, num_atletas * sizeof *tempo_corrido);
-  distancia_percorrida = malloc(num_atletas * sizeof *distancia_percorrida);
-  memset(distancia_percorrida, 0, num_atletas * sizeof *distancia_percorrida);
+  for (i = 0; i < NUM_ETAPAS; i++){
+    distancia_percorrida[i] = malloc(num_atletas * sizeof *distancia_percorrida);
+    memset(distancia_percorrida[i], 0, num_atletas * sizeof *distancia_percorrida);
+  }
   anuncios_posicao = malloc(num_atletas * sizeof *anuncios_posicao);
   for(i = 0; i < num_atletas; i++)
     anuncios_posicao[i] = queueInit(10);
@@ -96,6 +91,7 @@ int main(int argc, char **argv){
     strncpy(file, argv[2], 50);
   else
     strncpy(file, argv[1], 50);
+  tempo_anuncio = 30;
   /*achar nome do arquvivo*/
   readfile(file);
   aloca_globais();

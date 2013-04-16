@@ -6,20 +6,51 @@
 #include "queue.h"
 #include "globals.h"
 
+void natacao(int id){
+  double vel_dif, vel_min, vel_max, vel, vel_var, distancia_ultima_mudanca = 0;
+  const double distancia_mudanca = 100;
+  int categoria;
+  velocidades vel_ref;
+  categoria = categoria_atleta[id];
+  vel_ref = velocidades_etapa[ETAPA_NATACAO][0];
+  vel_min = vel_ref.min[categoria];
+  vel_max = vel_ref.max[categoria];
+  vel_var = ((double)rand())/RAND_MAX;
+  vel = vel_min + vel_var;
+  /*vel em metros/min */
+  while(distancia_percorrida[ETAPA_NATACAO][id] < distancia_etapa[ETAPA_NATACAO]){
+    if (distancia_ultima_mudanca + vel >= distancia_mudanca){
+      /*calcula quanto tempo demora para mudar*/
+      vel_var = ((double)rand())/RAND_MAX;
+      vel = vel_min + vel_var;
+      distancia_ultima_mudanca = 0;
+    }
+    tempo_corrido[id] += 60;
+    if (tempo_corrido[id] % (tempo_anuncio * 60) == 0){
+      /*anuncia*/
+    }
+    distancia_percorrida[ETAPA_NATACAO][id] += vel;
+  }
+}
+
 void *correr(void *arg){
   int id;
   info_atleta *info;
-  int etapa_atual = 0;
-  int ultimo_anuncio = 0;
-  int vel_atual, vel_dif;
-  int dist_etapa = 0, dist, dist_anuncio;
-  velocidades vel_ref;
-  int km_atual = 0, km_ant = 0, terreno_atual;
-  float random_variance, vel;
   info = (info_atleta *)arg;
   id = info->id;
   categoria_atleta[id] = info->categoria;
+  /*V(sem)*/
   initialized = 1;
+  natacao(id);
+  // transicao(id, 1);
+  //ciclismo(id);
+  //transicao(id, 2);
+  //corrida(id);
+  done[id] = 1;
+  return NULL;
+}
+
+/*
   while(!done[id]){
     while( dist_etapa < distancia_etapa[etapa_atual] ||
 	   etapa_atual == ETAPA_T1 || 
@@ -54,7 +85,6 @@ void *correr(void *arg){
       }
     }
     etapa_atual++;
-    /*Toda transicao tem que syncar*/
     if( etapa_atual < NUM_ETAPAS ){
       dist_etapa = 0;
       switch(etapa_atual){
@@ -73,7 +103,5 @@ void *correr(void *arg){
         sleep(1);
     }
     else
-      done[id] = 1;
-  }
-  return NULL;
-}
+  */
+

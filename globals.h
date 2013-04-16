@@ -35,13 +35,13 @@ typedef struct{
 
 typedef struct{
   int terreno;
-  int *atletas;
+  int atletas[3];
 }km_estrada;
 
 pthread_t *atleta;
 pthread_t classificacao;
 pthread_t sync_thread;
-int *PortalT1Ent, *PortalT1Sai, *PortalT2Ent, *PortalT2Sai; 
+int PortalT1Ent, PortalT1Sai, PortalT2Ent, PortalT2Sai; 
 km_estrada estrada[180];
 Queue *anuncios_posicao;
 
@@ -53,7 +53,10 @@ int distancia_etapa[NUM_ETAPAS];
 int go[NUM_ETAPAS];
 
 int *tempo_corrido;
-int *distancia_percorrida;
+int *distancia_percorrida[NUM_ETAPAS];
+int *etapa_atual;
+
+int tempo_anuncio;
 
 velocidades *velocidades_etapa[NUM_ETAPAS];
 
