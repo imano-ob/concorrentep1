@@ -68,8 +68,6 @@ int corrida(const int id, int minutos_anuncio){
 }
 
 int tem_espaco(int pos_estrada){
-  // int val_retorno;
-  /*lock estrada*/
   if(estrada[pos].atleta[0] == -1 || estrada[pos].atleta[1] == -1 || estrada[pos].atleta[2] == -1)
     return 1;
   else
@@ -97,22 +95,37 @@ int ciclismo(const int id, int minutos_anuncio){
       dist_parcial = resto_km > dist? dist:dist_parcial;
       distancia_percorrida[etapa][id] += dist_parcial;
       dist -= dist_parcial;
+      segundos_resto = dist_parcial / (vel/60);
+      segundos_calc -= segundos_resto;
+      tempo_corrido[etapa][id] += segundos_resto;
+      /*calcula tempo gasto - pode ser 0*/
       if (km_atual == 179 && dist >= 1){
-	//eeehn, whatever
+	tempo_corrido[etapa][id] += vel/60;
 	distancia_percorrida[etapa][id] = distancia_etapa[etapa];
 	continue;
       }
-      /*calcula tempo gasto - pode ser 0*/
-      km_prox = entrou?km_atual + 1 : 0
+      km_prox = entrou?km_atual + 1 : 0;
+      /*lock estrada*/
       if (tem_espaco(km_prox) && dist > 0){
       /*ter espaco tem que ser visto antes porque locka a estrada*/
 	if(entrou){
-	  /*libera anterior*/
+	  if(estrada[km_atual].atleta[0] == id)
+	    estrada[km_atual].atleta[0] = -1;
+	  else if (estrada[km_atual].atleta[1] == id)
+	    estrada[km_atual].atleta[1] = -1;
+	  else if (estrada[km_atual].atleta[2] == id)
+	    estrada[km_atual].atleta[2] = -1;
 	}
-        /*entra no km_prox*/
+	km_atual = km_prox;
+	if(estrada[km_atual].atleta[0] == -1)
+	  estrada[km_atual].atleta[0] = id;
+	else if (estrada[km_atual].atleta[1] == -1)
+	  estrada[km_atual].atleta[1] = id;
+	else if (estrada[km_atual].atleta[2] == -1)
+	  estrada[km_atual].atleta[2] = id;
 	entrou = 1;
         /*unlock estrada*/
-        /*recalcula dist*/
+	
 	vel_ref = velocidades_etapa[etapa][estrada[km_atual].terreno];
 	vel_min = vel_ref.min[categoria];
 	vel_max = vel_ref.max[categoria];
@@ -124,7 +137,7 @@ int ciclismo(const int id, int minutos_anuncio){
       else{
         /*unlock estrada*/
         dist = 0;
-	/*enrola ate o proximo minuto*/
+	tempo_corrido[etapa][id] += segundos_calc;
       }
     }
     /*sync*/
