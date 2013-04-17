@@ -38,10 +38,18 @@ typedef struct{
   int atletas[3];
 }km_estrada;
 
+struct portalnode{
+  int id;
+  int tempo;
+  struct portal *prox;
+};
+
+typedef portalnode *portal; 
+
 pthread_t *atleta;
 pthread_t classificacao;
 pthread_t sync_thread;
-int PortalT1Ent, PortalT1Sai, PortalT2Ent, PortalT2Sai; 
+portal PortalT1Ent, PortalT1Sai, PortalT2Ent, PortalT2Sai; 
 km_estrada estrada[180];
 Queue *anuncios_posicao;
 

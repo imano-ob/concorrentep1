@@ -9,7 +9,7 @@
 
 int nat_cor(const int id, const int etapa, int minutos_anuncio){
   double vel, vel_var, distancia_ultima_mudanca = 0;
-  const double distancia_mudanca = 100.0;
+  const double distancia_mudanca = etapa == ETAPA_NATACAO? 100.0: 1000.0;
   const int categoria = categora_atleta[id];
   int segundos_resto, segundos_calc;
   const velocidades vel_ref = velocidades_etapa[etapa][0];
@@ -35,14 +35,16 @@ int nat_cor(const int id, const int etapa, int minutos_anuncio){
   while(distancia_percorrida[etapa][id] < distancia_etapa[etapa]){
     distancia = vel;
     if (distancia_ultima_mudanca + distancia >= distancia_mudanca){
-      /*calcula quanto tempo demora para mudar*/
+      segundos_resto = (distancia_mudanca - distancia_ultima_mudanca) / vel;
+      segundos_calc = 60 - segundos_resto;
+      distancia_percorrida[etapa][id] = distancia_mudanca - distancia_ultima_mudanca;
       vel_var = ((double)rand()) * vel_dif/RAND_MAX;
       vel = vel_min + vel_var;
+      distancia = vel * (double)segundos_calc / 60.0;
       distancia_ultima_mudanca = 0;
     }
     if(distancia_percorrida[etapa][id] >= distancia_etapa[etapa]){
-      /*calcula quanto tempo demora*/
-      distancia_percorrida[etapa][id] = distancia_etapa[etapa];
+      tempo_corrido[etapa][id] += segunds_resto;
     }
     else{
       tempo_corrido[id] += 60;
