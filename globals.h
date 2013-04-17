@@ -41,10 +41,10 @@ typedef struct{
 struct portalnode{
   int id;
   int tempo;
-  struct portal *prox;
+  struct portalnode *prox;
 };
 
-typedef portalnode *portal; 
+typedef struct portalnode *portal; 
 
 pthread_t *atleta;
 pthread_t classificacao;
