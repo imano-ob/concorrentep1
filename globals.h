@@ -41,7 +41,7 @@ typedef struct{
 struct portalnode{
   int id;
   int tempo;
-  struct portalnode *prox;
+  struct portalnode *next;
 };
 
 typedef struct portalnode *portal; 
@@ -49,16 +49,20 @@ typedef struct portalnode *portal;
 pthread_t *atleta;
 pthread_t classificacao;
 pthread_t sync_thread;
-portal PortalT1Ent, PortalT1Sai, PortalT2Ent, PortalT2Sai; 
+sem_t *arrive;
+sem_t *libera;
+portal PortalT1Ent, PortalT1Sai, PortalT2Ent, PortalT2Sai;
+sem_t pt1e, pt1s, pt2e, pt2s;
 km_estrada estrada[180];
-Queue *anuncios_posicao;
+sem_t mutex_estrada[180];
+
+sem_t *atleta_posicao;
+sem_t *classificacao_posicao;
 
 int *categoria_atleta;
 int todos_done;
 
 int distancia_etapa[NUM_ETAPAS];
-
-int go[NUM_ETAPAS];
 
 int *tempo_corrido;
 int *distancia_percorrida[NUM_ETAPAS];
@@ -72,7 +76,5 @@ int num_atletas;
 int participantes_categoria[NUM_CATEGORIAS];
 
 int *done;
-
-int initialized;
 
 #endif /*__GLOBALS__*/

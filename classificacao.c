@@ -15,6 +15,8 @@ typedef struct{
 
 /*Funcao de comparacao pro qsort*/
 static int compare_info(const void *atleta1, const void *atleta2){
+  if (etapa_atual[((cur_atleta_info *)atleta2)->id] != etapa_atual[((cur_atleta_info *)atleta1)->id])
+    return etapa_atual[((cur_atleta_info *)atleta2)->id] - etapa_atual[((cur_atleta_info *)atleta1)->id];
   return ((cur_atleta_info *)atleta2)->distancia - ((cur_atleta_info*)atleta1)->distancia;
 }
 
@@ -27,13 +29,14 @@ void *anunciar(void *args){
     for(i = 0; i < NUM_CATEGORIAS; i++)
       cur_local_id[i] = 0;
     for (i = 0; i < num_atletas; i++){
-      while(queueEmpty(anuncios_posicao[i]))
-        sleep(1);
-      categoria = categoria_atleta[i];
-      info[categoria][cur_local_id[categoria]].distancia =
-        queueTake(anuncios_posicao[i]);
-      info[categoria][cur_local_id[categoria]].id = i;
-      cur_local_id[categoria] += 1;
+      if(!done[i]){
+	sem_wait(&classificacao_posicao);
+	categoria = categoria_atleta[i];
+	info[categoria][cur_local_id[categoria]].distancia =
+	  distancia_percorrida[etapa_atual[i]][i];
+	info[categoria][cur_local_id[categoria]].id = i;
+	cur_local_id[categoria] += 1;
+      }
     }
     for(i = 0; i < NUM_CATEGORIAS; i++){
       qsort((void*)info[i], participantes_categoria[categoria], sizeof(cur_atleta_info), compare_info);

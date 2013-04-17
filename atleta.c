@@ -8,21 +8,22 @@
 
 void sync(const int id){
   portal P, tmp, aux;
+  sem_t *lock;
   int tempo_no_portal;
-  /*V barreira*/
-  /*P outrabarreira */
+  sem_post(&arrive[id]);
+  sem_wait(&libera[id]);
   if (em_portal[id]){
     switch(em_portal[id]){
     case(1):
-      P = PortalT1Ent; break;
+      P = PortalT1Ent; lock = &pt1e; break;
     case(2):
-      P = PortalT2Ent; break;
+      P = PortalT2Ent; lock = &pt2e; break;
     case(3):
-      P = PortalT1Sai; break;
+      P = PortalT1Sai; lock = &pt1s; break;
     case(4):
-      P = PortalT2Sai; break;
+      P = PortalT2Sai; lock = &pt2s; break;
     }
-    /*lock portal*/
+    sem_wait(lock);
     for(tmp = P; tmp->next != NULL; tmp=tmp->next)
       if(tmp->next->id == id){
 	tempo_no_portal = tmp->next->tempo;
@@ -34,8 +35,13 @@ void sync(const int id){
     for(tmp = P; tmp->next != NULL; tmp=tmp->next)
       if(tmp->next->tempo == tempo_no_portal)
 	tempo_corrido[id] += 3;
-    /*unlock portal*/
+    sem_post(lock);
+    em_portal[id] = 0;
   }
+}
+
+void anuncia(const int id){
+  sem_post(&classificacao_posicao[id]);
 }
 
 int nat_cor(const int id, const int etapa, int minutos_anuncio){
@@ -51,8 +57,6 @@ int nat_cor(const int id, const int etapa, int minutos_anuncio){
   vel_var = ((double)rand()) * vel_dif/RAND_MAX;
   vel = vel_min + vel_var;
   /*vel em metros/min */
-
-  /*1 iteracao - arredonda*/
   if((segundos_resto = tempo_corrido[id] % 60)){
     segundos_calc = 60 - segundos_resto;
     distancia = ((double)segundos_calc / 60.0) * vel;
@@ -60,10 +64,10 @@ int nat_cor(const int id, const int etapa, int minutos_anuncio){
     tempo_corrido += segundos_calc;
     minutos_anuncio++;
     if (minutos_anuncio == tempo_anuncio){
-      /*anuncia*/
+      anuncia(id);
       minutos_anuncio = 0;
     }
-    /*sync*/
+    sync(id);
   }
   while(distancia_percorrida[etapa][id] < distancia_etapa[etapa]){
     distancia = vel;
@@ -83,12 +87,12 @@ int nat_cor(const int id, const int etapa, int minutos_anuncio){
       tempo_corrido[id] += 60;
       minutos_anuncio++;
 	if (minutos_anuncio == tempo_anuncio){
-	  /*anuncia*/
+	  anuncia(id);
 	  minutos_anuncio = 0;
 	}
       distancia_ultima_mudanca += distancia;
       distancia_percorrida[etapa][id] += distancia;
-      /*sync*/
+      sync(id);
     }
   }
   return minutos_anuncio;
@@ -139,10 +143,10 @@ int ciclismo(const int id, int minutos_anuncio){
 	continue;
       }
       km_prox = entrou?km_atual + 1 : 0;
-      /*lock estrada*/
+      sem_wait(&mutex_estrada[km_prox]);
       if (tem_espaco(km_prox) && dist > 0){
-      /*ter espaco tem que ser visto antes porque locka a estrada*/
-	if(entrou){
+      	if(entrou){
+	  sem_wait(&mutex_estrada[km_atual]);
 	  if(estrada[km_atual].atletas[0] == id)
 	    estrada[km_atual].atletas[0] = -1;
 	  else if (estrada[km_atual].atletas[1] == id)
@@ -150,6 +154,7 @@ int ciclismo(const int id, int minutos_anuncio){
 	  else if (estrada[km_atual].atletas[2] == id)
 	    estrada[km_atual].atletas[2] = -1;
 	}
+	sem_post(&mutex_estrada[km_atual]);
 	km_atual = km_prox;
 	if(estrada[km_atual].atletas[0] == -1)
 	  estrada[km_atual].atletas[0] = id;
@@ -157,10 +162,8 @@ int ciclismo(const int id, int minutos_anuncio){
 	  estrada[km_atual].atletas[1] = id;
 	else if (estrada[km_atual].atletas[2] == -1)
 	  estrada[km_atual].atletas[2] = id;
-	entrou = 1;
-        /*unlock estrada*/
-	
-	vel_ref = velocidades_etapa[etapa][estrada[km_atual].terreno];
+	sem_ṕost(&mutex_estrada[km_atual]);
+	entrou = 1;vel_ref = velocidades_etapa[etapa][estrada[km_atual].terreno];
 	vel_min = vel_ref.min[categoria];
 	vel_max = vel_ref.max[categoria];
 	vel_dif = vel_max - vel_min;
@@ -169,14 +172,14 @@ int ciclismo(const int id, int minutos_anuncio){
 	dist = ((double)segundos_calc/60.0) * vel;
       }
       else{
-        /*unlock estrada*/
+	sem_post(&mutex_estrada[km_prox]);
         dist = 0;
 	tempo_corrido[id] += segundos_calc;
       }
     }
-    /*sync*/
+    sync(id);
     if(minutos_anuncio == tempo_anuncio){
-      /*anuncia se for o caso*/
+      anuncia(id);
       minutos_anuncio = 0;
     }
     segundos_calc = 60;
@@ -185,32 +188,33 @@ int ciclismo(const int id, int minutos_anuncio){
 }
 
 int transicao(const int id, const int portal, int minutos_anuncio){
-  /*lock portal*/
   portal P, tmp;
+  sem_t *lock;
   int tempo_transicao;
   switch(portal){
   case(0):
-    P = PortalT1Ent; break;
+    P = PortalT1Ent; lock = &pt1e; break;
   case(1):
-    P = PortalT2Ent; break;
+    P = PortalT2Ent; lock = &pt2e; break;
   }
+  sem_wait(lock);
   tmp = P->next;
   P->next = malloc(sizeof *(P->next));
   P->next->id = id;
   p->next->tempo = tempo_corrido[id];
   P->next->next = tmp;
   em_portal[id] = portal+1;
-  /*unlock*/
+  sem_ṕost(lock);
   /*sorteia tempo de estadia*/
   while(tempo_transicao > 0){
     tempo_espera = 60 - (tempo_corrido[id] % 60);
     if(tempo_transicao >= tempo_espera){
       tempo_corrido[id] += tempo_espera;
       tempo_transicao -= tempo_espera;
-      /*sync*/
+      sync(id);
       minutos_anuncio++;
       if(minutos_anuncio == tempo_anuncio){
-	/*anuncia*/
+	anuncia(id);
 	minutos_anuncio = 0;
       }
     }
@@ -221,18 +225,18 @@ int transicao(const int id, const int portal, int minutos_anuncio){
   }
   switch(portal){
   case(0):
-    P = PortalT1Sai; break;
+    P = PortalT1Sai; lock = &pt1s; break;
   case(1):
-    P = PortalT2Sai; break;
+    P = PortalT2Sai; lock = &pt2s; break;
   }
-  /*lock portal*/
+  sem_wait(lock);
   tmp = P->next;
   P->next = malloc(sizeof *(P->next));
   P->next->id = id;
   p->next->tempo = tempo_corrido[id];
   P->next->next = tmp;
   em_portal[id] = portal+3;
-  /*unlock*/
+  sem_post(lock);
   return minutos_anuncio;
 }
 
@@ -244,7 +248,7 @@ void *correr(void *arg){
   info = (info_atleta *)arg;
   id = info->id;
   categoria_atleta[id] = info->categoria;
-  /*V(sem)*/
+  sem_post(&init);
   initialized = 1;
   minutos_anuncio = natacao(id, minutos_anuncio);
   minutos_anuncio = transicao(id, 1, minutos_anuncio);

@@ -11,7 +11,7 @@
 #include "queue.h"
 #include "globals.h"
 
-velocidades inicaliza_vels(int hp_min, int hp_max, int mp_min, int mp_max, int ha_min, int ha_max,
+velocidades inicializa_vels(int hp_min, int hp_max, int mp_min, int mp_max, int ha_min, int ha_max,
                            int ma_min, int ma_max){
   velocidades vel;
   vel.min[CAT_HOMEM_PRO] = hp_min;
@@ -77,9 +77,15 @@ void aloca_globais(){
     distancia_percorrida[i] = malloc(num_atletas * sizeof *distancia_percorrida);
     memset(distancia_percorrida[i], 0, num_atletas * sizeof *distancia_percorrida);
   }
-  anuncios_posicao = malloc(num_atletas * sizeof *anuncios_posicao);
-  for(i = 0; i < num_atletas; i++)
-    anuncios_posicao[i] = queueInit(10);
+  arrive = malloc(num_atletas * sizeof *arrive);
+  for (i = 0; i < num_atletas; i++)
+    sem_init(&arrive[i], 0 , 0);
+  libera = malloc(num_atletas * sizeof *libera);
+  for (i = 0; i < num_atletas; i++)
+    sem_init(&libera[i], 0 , 0);
+  classificacao_posicao = malloc(num_atletas * sizeof *classificacao_posicao);
+  for (i = 0; i < num_atletas; i++)
+    sem_init(&classificacao_posicao[i], 0 , 0);
 }
 
 int main(int argc, char **argv){
@@ -92,7 +98,6 @@ int main(int argc, char **argv){
   else
     strncpy(file, argv[1], 50);
   tempo_anuncio = 30;
-  /*achar nome do arquvivo*/
   readfile(file);
   aloca_globais();
   /*mais init*/ 
@@ -104,21 +109,26 @@ int main(int argc, char **argv){
   distancia_etapa[ETAPA_CICLISMO] = 180000;
   distancia_etapa[ETAPA_T2] = 0;
   distancia_etapa[ETAPA_CORRIDA] = 42000;
+  sem_init(&pt1e, 0, 1);
+  sem_init(&pt1s, 0, 1);
+  sem_init(&pt2e, 0, 1);
+  sem_init(&pt2s, 0, 1);
+  for(i = 0; i < 180; i++)
+    sem_init(&mutex_estrada[i], 0, 1);
+  sem_init(&init, 0, 0)
   if(pthread_create(&classificacao, NULL, &anunciar, NULL)){
     fprintf(stderr, "Erro ao criar thread da classificacao\n");
     exit(EXIT_FAILURE);
   }
   for (i = 0; i < NUM_CATEGORIAS; i++){
     for (j = 0; j < participantes_categoria[i]; j++){
-      initialized = 0;
       info.categoria = i;
       info.id = id_atleta;
       if(pthread_create(&atleta[id_atleta], NULL, &correr, &info)){
 	fprintf(stderr, "Erro ao criar thread do atleta\n");
 	exit(EXIT_FAILURE);
       }
-      while (!initialized) 
-	sleep(1);
+      sem_wait(&init);
       id_atleta++;
     }
   }
