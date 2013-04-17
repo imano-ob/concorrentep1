@@ -73,10 +73,44 @@ void aloca_globais(){
   memset(done, 0, num_atletas * sizeof *done);
   tempo_corrido = malloc(num_atletas * sizeof *tempo_corrido);
   memset(tempo_corrido, 0, num_atletas * sizeof *tempo_corrido);
+  em_portal = malloc(num_atletas * sizeof *em_portal);
+  memset(tempo_corrido, 0, num_atletas * sizeof *em_portal);
   for (i = 0; i < NUM_ETAPAS; i++){
     distancia_percorrida[i] = malloc(num_atletas * sizeof *distancia_percorrida);
     memset(distancia_percorrida[i], 0, num_atletas * sizeof *distancia_percorrida);
+    if(i == ETAPA_CICLISMO)
+      velocidades_etapa[i] = malloc(3 * sizeof *velocidades_etapa[i]);
+    else
+      velocidades_etapa[i] = malloc(sizeof *velocidades_etapa[i]);
   }
+  velocidades_etapa[ETAPA_NATACAO][0] = inicializa_vels(6000 /100, 6000 /75, 
+							6000 /120, 6000 / 90, 
+							6000/240, 6000/120, 
+							6000/300, 6000/150);
+  velocidades_etapa[ETAPA_CICLISMO][CICLISMO_PLANO] = inicializa_vels(500 / .6, 550 /.6,
+								      450/.6, 500/.6,
+								      300/.6, 450/.6,
+								      250/.6, 400/.6);
+  velocidades_etapa[ETAPA_CICLISMO][CICLISMO_SUBIDA] = inicializa_vels(300/.6, 400/.6,
+								       200/.6, 300/.6,
+								       120/.6, 200/.6,
+								       100/.6, 200/.6);
+  velocidades_etapa[ETAPA_CICLISMO][CICLISMO_DESCIDA] = inicializa_vels(800/.6, 1000/.6,
+									700/.6, 900/.6,
+									500/.6, 700/.6,
+									500/.6, 650/.6);
+  velocidades_etapa[ETAPA_CORRIDA][0] = inicializa_vels(60000/260, 60000/240, 
+							60000/290, 60000/260, 
+							60000/420, 60000/300, 
+							60000/420, 60000/330);
+  velocidades_etapa[ETAPA_T1][0] = inicializa_vels(90, 150,
+						   90, 150,
+						   150, 330,
+						   150, 390);
+  velocidades_etapa[ETAPA_T2][0] = inicializa_vels(120, 180,
+						   150, 360,
+						   240, 600,
+						   270, 720);
   arrive = malloc(num_atletas * sizeof *arrive);
   for (i = 0; i < num_atletas; i++)
     sem_init(&arrive[i], 0 , 0);
@@ -115,7 +149,7 @@ int main(int argc, char **argv){
   sem_init(&pt2s, 0, 1);
   for(i = 0; i < 180; i++)
     sem_init(&mutex_estrada[i], 0, 1);
-  sem_init(&init, 0, 0)
+  sem_init(&init, 0, 0);
   if(pthread_create(&classificacao, NULL, &anunciar, NULL)){
     fprintf(stderr, "Erro ao criar thread da classificacao\n");
     exit(EXIT_FAILURE);

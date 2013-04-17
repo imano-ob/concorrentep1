@@ -6,7 +6,7 @@
 #include "queue.h"
 #include "globals.h"
 
-void sync(const int id){
+void sync_atleta(const int id){
   portal P, tmp, aux;
   sem_t *lock;
   int tempo_no_portal;
@@ -27,7 +27,7 @@ void sync(const int id){
     for(tmp = P; tmp->next != NULL; tmp=tmp->next)
       if(tmp->next->id == id){
 	tempo_no_portal = tmp->next->tempo;
-	aux = temp->next;
+	aux = tmp->next;
 	tmp->next = tmp->next->next;
 	free(aux);
 	break;
@@ -67,7 +67,7 @@ int nat_cor(const int id, const int etapa, int minutos_anuncio){
       anuncia(id);
       minutos_anuncio = 0;
     }
-    sync(id);
+    sync_atleta(id);
   }
   while(distancia_percorrida[etapa][id] < distancia_etapa[etapa]){
     distancia = vel;
@@ -92,7 +92,7 @@ int nat_cor(const int id, const int etapa, int minutos_anuncio){
 	}
       distancia_ultima_mudanca += distancia;
       distancia_percorrida[etapa][id] += distancia;
-      sync(id);
+      sync_atleta(id);
     }
   }
   return minutos_anuncio;
@@ -162,7 +162,7 @@ int ciclismo(const int id, int minutos_anuncio){
 	  estrada[km_atual].atletas[1] = id;
 	else if (estrada[km_atual].atletas[2] == -1)
 	  estrada[km_atual].atletas[2] = id;
-	sem_ṕost(&mutex_estrada[km_atual]);
+	sem_post(&mutex_estrada[km_atual]);
 	entrou = 1;vel_ref = velocidades_etapa[etapa][estrada[km_atual].terreno];
 	vel_min = vel_ref.min[categoria];
 	vel_max = vel_ref.max[categoria];
@@ -177,7 +177,7 @@ int ciclismo(const int id, int minutos_anuncio){
 	tempo_corrido[id] += segundos_calc;
       }
     }
-    sync(id);
+    sync_atleta(id);
     if(minutos_anuncio == tempo_anuncio){
       anuncia(id);
       minutos_anuncio = 0;
@@ -187,31 +187,34 @@ int ciclismo(const int id, int minutos_anuncio){
   return minutos_anuncio;
 }
 
-int transicao(const int id, const int portal, int minutos_anuncio){
-  portal P, tmp;
+int transicao(const int id, const int portal_id, int minutos_anuncio){
   sem_t *lock;
-  int tempo_transicao;
-  switch(portal){
+  int tempo_transicao, tempo_espera, etapa;
+  portal P, tmp;
+  switch(portal_id){
   case(0):
-    P = PortalT1Ent; lock = &pt1e; break;
+    P = PortalT1Ent; lock = &pt1e; etapa = ETAPA_T1; break;
   case(1):
-    P = PortalT2Ent; lock = &pt2e; break;
+    P = PortalT2Ent; lock = &pt2e; etapa = ETAPA_T2; break;
   }
   sem_wait(lock);
   tmp = P->next;
   P->next = malloc(sizeof *(P->next));
   P->next->id = id;
-  p->next->tempo = tempo_corrido[id];
+  P->next->tempo = tempo_corrido[id];
   P->next->next = tmp;
-  em_portal[id] = portal+1;
-  sem_ṕost(lock);
-  /*sorteia tempo de estadia*/
+  em_portal[id] = portal_id+1;
+  sem_post(lock);
+  tempo_transicao = ((double)rand()/RAND_MAX) * (velocidades_etapa[etapa][0].max[categoria_atleta[id]] -
+						 velocidades_etapa[etapa][0].min[categoria_atleta[id]]) +
+    velocidades_etapa[etapa][0].min[categoria_atleta[id]];
+
   while(tempo_transicao > 0){
     tempo_espera = 60 - (tempo_corrido[id] % 60);
     if(tempo_transicao >= tempo_espera){
       tempo_corrido[id] += tempo_espera;
       tempo_transicao -= tempo_espera;
-      sync(id);
+      sync_atleta(id);
       minutos_anuncio++;
       if(minutos_anuncio == tempo_anuncio){
 	anuncia(id);
@@ -223,7 +226,7 @@ int transicao(const int id, const int portal, int minutos_anuncio){
       tempo_transicao = 0;
     }
   }
-  switch(portal){
+  switch(portal_id){
   case(0):
     P = PortalT1Sai; lock = &pt1s; break;
   case(1):
@@ -233,9 +236,9 @@ int transicao(const int id, const int portal, int minutos_anuncio){
   tmp = P->next;
   P->next = malloc(sizeof *(P->next));
   P->next->id = id;
-  p->next->tempo = tempo_corrido[id];
+  P->next->tempo = tempo_corrido[id];
   P->next->next = tmp;
-  em_portal[id] = portal+3;
+  em_portal[id] = portal_id+3;
   sem_post(lock);
   return minutos_anuncio;
 }
@@ -249,7 +252,6 @@ void *correr(void *arg){
   id = info->id;
   categoria_atleta[id] = info->categoria;
   sem_post(&init);
-  initialized = 1;
   minutos_anuncio = natacao(id, minutos_anuncio);
   minutos_anuncio = transicao(id, 1, minutos_anuncio);
   minutos_anuncio = ciclismo(id, minutos_anuncio);

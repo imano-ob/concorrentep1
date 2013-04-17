@@ -2,6 +2,7 @@
 #define __GLOBALS__
 
 #include <pthread.h>
+#include <semaphore.h>
 
 #include "queue.h"
 
@@ -38,13 +39,15 @@ typedef struct{
   int atletas[3];
 }km_estrada;
 
+
+typedef struct portalnode *portal; 
+
 struct portalnode{
   int id;
   int tempo;
-  struct portalnode *next;
+  portal next;
 };
 
-typedef struct portalnode *portal; 
 
 pthread_t *atleta;
 pthread_t classificacao;
@@ -56,11 +59,12 @@ sem_t pt1e, pt1s, pt2e, pt2s;
 km_estrada estrada[180];
 sem_t mutex_estrada[180];
 
-sem_t *atleta_posicao;
 sem_t *classificacao_posicao;
 
 int *categoria_atleta;
 int todos_done;
+
+int *em_portal;
 
 int distancia_etapa[NUM_ETAPAS];
 
@@ -76,5 +80,7 @@ int num_atletas;
 int participantes_categoria[NUM_CATEGORIAS];
 
 int *done;
+
+sem_t init;
 
 #endif /*__GLOBALS__*/

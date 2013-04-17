@@ -7,10 +7,13 @@
 
 void *sincroniza(void *arg){
   int i;
-  for(i = 0; i < num_atletas; i++)
-    if(!done[i])
-      sem_wait(&arrive[i]);
-  for(i = 0; i < num_atletas; i++)
-    if(!done[i])
-      sem_post(&libera[i]);
+  while(!todos_done){
+    for(i = 0; i < num_atletas; i++)
+      if(!done[i])
+	sem_wait(&arrive[i]);
+    for(i = 0; i < num_atletas; i++)
+      if(!done[i])
+	sem_post(&libera[i]);
+  }
+  return NULL;
 }

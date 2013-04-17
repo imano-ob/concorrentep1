@@ -30,7 +30,7 @@ void *anunciar(void *args){
       cur_local_id[i] = 0;
     for (i = 0; i < num_atletas; i++){
       if(!done[i]){
-	sem_wait(&classificacao_posicao);
+	sem_wait(&classificacao_posicao[i]);
 	categoria = categoria_atleta[i];
 	info[categoria][cur_local_id[categoria]].distancia =
 	  distancia_percorrida[etapa_atual[i]][i];
