@@ -7,16 +7,14 @@
 #include "globals.h"
 
 
-int nat_cor(int id, int etapa, int minutos_anuncio){
-  double vel_dif, vel_min, vel_max, vel, vel_var, distancia_ultima_mudanca = 0;
+int nat_cor(const int id, const int etapa, int minutos_anuncio){
+  double vel, vel_var, distancia_ultima_mudanca = 0;
   const double distancia_mudanca = 100.0;
-  int categoria, segundos_resto, segundos_calc;
-  velocidades vel_ref;
-  categoria = categoria_atleta[id];
-  vel_ref = velocidades_etapa[etapa][0];
-  vel_min = vel_ref.min[categoria];
-  vel_max = vel_ref.max[categoria];
-  vel_dif = max - vel_min;
+  const int categoria = categora_atleta[id];
+  int segundos_resto, segundos_calc;
+  const velocidades vel_ref = velocidades_etapa[etapa][0];
+  const double vel_min = vel_ref.min[categoria], vel_max vel_ref.max[categoria];
+  const double vel_dif vel_max - vel_min;
   vel_var = ((double)rand()) * vel_dif/RAND_MAX;
   vel = vel_min + vel_var;
   /*vel em metros/min */
@@ -61,11 +59,11 @@ int nat_cor(int id, int etapa, int minutos_anuncio){
   return minutos_anuncio;
 }
 
-int natacao(int id, int minutos_anuncio){
+int natacao(const int id, int minutos_anuncio){
   return nat_cor(id, ETAPA_NATACAO, minutos_anuncio);
 }
 
-int corrida(int id, int minutos_anuncio){
+int corrida(const int id, int minutos_anuncio){
   return nat_cor(id, ETAPA_CORRIDA, minutos_anuncio);
 }
 
@@ -78,43 +76,60 @@ int tem_espaco(int pos_estrada){
     return 0;
 }
 
-int ciclismo(int id, int minutos_anuncio){
-  double vel_dif, vel_min, vel_max, vel, vel_var, distancia_ultima_mudanca = 0;
+int ciclismo(const int id, int minutos_anuncio){
+  double vel_dif, vel_min, vel_max, vel, vel_var, distancia_ultima_mudanca = 0, dist, dist_parcial;
   const double distancia_mudanca = 1000.0;
-  int categoria, segundos_resto, segundos_calc;
+  const int categoria = categoria_atleta[id];
+  int categoria, segundos_resto, segundos_calc, km_atual = 0, km_prox, entrou = 0, resto_km;
   velocidades vel_ref;
-  /*1 iteracao*/
-  /*calcula dist*/
-  /*if tem espaco*/
-    /*entra e corre ate completar 1min*/
-    /*^Ver abaixo*/
-  /*else*/
-    /*enrola ate completar o minuto com sadface*/
-  /*sync*/
-  /*anuncia se for o caso*/
-  while(/*nao termina*/){
-    /*calcula dist*/
-    /*while remaining dist > 0*/
-      /*corre min(dist, o que falta para completar um km)*/
-      /*^pode ser 0*/
-      /*dist -= o que correu*/
-      /*if ultimo km e sobrou dist*/
-        /*gg noobs, terminei aqui*/
+  const etapa = ETAPA_CICLISMO;
+  segundos_calc = 60 - (tempo_corrido[etapa][id] % 60);
+  while(distancia_percorrida[etapa][id] < distancia_etapa[etapa]){
+    vel_ref = velocidades_etapa[etapa][estrada[km_atual].terreno];
+    vel_min = vel_ref.min[categoria];
+    vel_max = vel_ref.max[categoria];
+    vel_dif = vel_max - vel_min;
+    vel_var = ((double)rand()) * vel_dif/RAND_MAX;
+    vel = vel_min + vel_var;
+    dist = ((double)segundos_calc/60.0) * vel;
+    while (dist > 0){
+      resto_km = entrou? (1000 - ((distancia_percorrida[etapa][id] + 1) % 1000)) : 0;
+      dist_parcial = resto_km > dist? dist:dist_parcial;
+      distancia_percorrida[etapa][id] += dist_parcial;
+      dist -= dist_parcial;
+      if (km_atual == 179 && dist >= 1){
+	//eeehn, whatever
+	distancia_percorrida[etapa][id] = distancia_etapa[etapa];
+	continue;
+      }
       /*calcula tempo gasto - pode ser 0*/
-      /*if tem espaco e dist > 0 */
+      km_prox = entrou?km_atual + 1 : 0
+      if (tem_espaco(km_prox) && dist > 0){
       /*ter espaco tem que ser visto antes porque locka a estrada*/
-        /*libera anterior*/
-        /*entra no novo*/
+	if(entrou){
+	  /*libera anterior*/
+	}
+        /*entra no km_prox*/
+	entrou = 1;
         /*unlock estrada*/
         /*recalcula dist*/
-      /*else*/
+	vel_ref = velocidades_etapa[etapa][estrada[km_atual].terreno];
+	vel_min = vel_ref.min[categoria];
+	vel_max = vel_ref.max[categoria];
+	vel_dif = vel_max - vel_min;
+	vel_var = ((double)rand()) * vel_dif/RAND_MAX;
+	vel = vel_min + vel_var;
+	dist = ((double)segundos_calc/60.0) * vel;
+      }
+      else{
         /*unlock estrada*/
-        /*dist = 0*/
-        /*enrola ate o proximo minuto*/
-    /*else*/
-      /*enrola ate o proxmo minuto*/
+        dist = 0;
+	/*enrola ate o proximo minuto*/
+      }
+    }
     /*sync*/
     /*anuncia se for o caso*/
+    segundos_calc = 60;
   }
 }
 
