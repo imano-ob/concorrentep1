@@ -8,7 +8,6 @@
 #include "classificacao.h"
 #include "atleta.h"
 #include "sync.h"
-#include "queue.h"
 #include "globals.h"
 
 velocidades inicializa_vels(int hp_min, int hp_max, int mp_min, int mp_max, int ha_min, int ha_max,

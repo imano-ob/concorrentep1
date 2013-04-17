@@ -4,8 +4,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "queue.h"
-
 #define CAT_HOMEM_PRO 0
 #define CAT_MULHER_PRO 1
 #define CAT_HOMEM_AMADOR 2

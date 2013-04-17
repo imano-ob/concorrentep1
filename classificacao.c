@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "globals.h"
-#include "queue.h"
 
 typedef struct{
   int distancia;

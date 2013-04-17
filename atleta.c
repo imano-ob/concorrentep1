@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "queue.h"
 #include "globals.h"
 
 void sync_atleta(const int id){
